@@ -1,82 +1,83 @@
-/**
- *  handleShipAnimation moves the ship based on its direction and
- *    keyboard control
- *
- */
-function handleShipAnimation() {
-  if (CONTROLS.ship.forward) {
-    var radians = (Math.PI / 180) * SPACE_SHIP.rotation,
-        cos = Math.cos(radians),
-        sin = Math.sin(radians);
-    SPACE_SHIP.x += SPACE_SHIP.speed * sin;
-    SPACE_SHIP.y +=  SPACE_SHIP.speed * cos;
-  }
-  if (CONTROLS.ship.backward) {
-    var radians = (Math.PI / 180) * SPACE_SHIP.rotation,
-        cos = Math.cos(radians),
-        sin = Math.sin(radians);
-    SPACE_SHIP.x -= SPACE_SHIP.speed * sin;
-    SPACE_SHIP.y -=  SPACE_SHIP.speed * cos;
-  }
-  if (CONTROLS.ship.rotateClockwise) {
-    SPACE_SHIP.rotation -= 4;
-  }
-  if (CONTROLS.ship.rotateCounterClockwise) {
-    SPACE_SHIP.rotation += 4;
-  }
-
-  // Check if asteroid is leaving the boundary, if so, switch sides
-  if (SPACE_SHIP.x > GAME.canvas.width) {
-    SPACE_SHIP.x = 0;
-  } else if (SPACE_SHIP.x < 0) {
-    SPACE_SHIP.x = 600;
-  } else if (SPACE_SHIP.y > GAME.canvas.height) {
-    SPACE_SHIP.y = 0;
-  } else if (SPACE_SHIP.y < 0) {
-    SPACE_SHIP.y = 300;
-  }
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var x = canvas.width/2;
+var y = canvas.height-30;
+var dx = 2;
+var dy = -2;
+var paddleHeight = 50;
+var paddleWidth = 50;
+var paddleX = (canvas.width-paddleWidth)/2;
+var paddleY = (canvas.height-paddleHeight)/2;
+var rightPressed = false;
+var leftPressed = false;
+var upPressed = false;
+var downPressed = false;
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+function keyDownHandler(e) {
+    if(e.key == "Right" || e.key == "ArrowRight") {
+        rightPressed = true;
+    }
+    else if(e.key == "Left" || e.key == "ArrowLeft") {
+        leftPressed = true;
+    }
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = true;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = true;
+    }
 }
-
-function RenderNewObject(context) {
-  var x = 0;
-  var y = 0;
-  context.fillRect (NEW_OBJECT.x, NEW_OBJECT.y, 40, 40);
-    //ctx = NEW_OBJECT;
+function keyUpHandler(e) {
+    if(e.key == "Right" || e.key == "ArrowRight") {
+        rightPressed = false;
+    }
+    else if(e.key == "Left" || e.key == "ArrowLeft") {
+        leftPressed = false;
+    }
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = false;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = false;
+    }
 }
-
-function HandleNewObjectMovement() {
-  if (NEW_OBJECT.x<100)
-  {
-  NEW_OBJECT.x += 1;
-  NEW_OBJECT.y += 1;
-  }
-  else
-  {
-    NEW_OBJECT.x+=1;
-  }
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, paddleY, paddleHeight, paddleWidth);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
 }
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPaddle();
+    if(rightPressed) {
+        paddleX += 2;
+        if (paddleX + paddleWidth > canvas.width){
+            paddleX = canvas.width - paddleWidth;
+        }
+    }
+    else if(leftPressed) {
+        paddleX -= 2;
+        if (paddleX < 0){
+            paddleX = 0;
+        }
+    }
+    else if(upPressed) {
+        paddleY -= 2;
+        if (paddleY < 0){
+            paddleY = 0;
+        }
 
-function runGame() {
-  var canvas = document.getElementById('mainCanvas');
-  var context = canvas.getContext('2d');
-  if (GAME.started) {
-
-    // 1 - Reposition the objects
-    handleShipAnimation();
-    HandleNewObjectMovement();
-
-    // 2 - Clear the CANVAS
-    context.clearRect(0, 0, 600, 300);
-
-    // 3 - Draw new items
-    RenderSpaceship(context);
-    RenderNewObject(context);
-
-  } else {
-    context.font = "30px Arial";
-    context.fillText("Game Over      Level " + GAME.level, 135, 200);
-  }
-  window.requestAnimationFrame(runGame);
+    }
+    else if(downPressed) {
+        paddleY += 2;
+        if (paddleY + paddleHeight > canvas.height){
+            paddleY = canvas.height - paddleHeight;
+        }
+    }
+    x += dx;
+    y += dy;
 }
-
-window.requestAnimationFrame(runGame);
+setInterval(draw, 1);
